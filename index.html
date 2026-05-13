@@ -1,51 +1,198 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes App</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            background:#0f172a;
+            color:white;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+            padding:20px;
+        }
+
+        .container{
+            width:100%;
+            max-width:600px;
+            background:#1e293b;
+            padding:30px;
+            border-radius:20px;
+            box-shadow:0 0 25px rgba(0,0,0,0.3);
+        }
+
+        h1{
+            text-align:center;
+            margin-bottom:25px;
+            font-size:2rem;
+        }
+
+        .input-section{
+            display:flex;
+            gap:10px;
+            margin-bottom:25px;
+        }
+
+        input{
+            flex:1;
+            padding:14px;
+            border:none;
+            border-radius:10px;
+            outline:none;
+            font-size:16px;
+            background:#334155;
+            color:white;
+        }
+
+        input::placeholder{
+            color:#cbd5e1;
+        }
+
+        .add-btn{
+            padding:14px 20px;
+            border:none;
+            border-radius:10px;
+            cursor:pointer;
+            background:#3b82f6;
+            color:white;
+            font-weight:bold;
+            transition:0.2s;
+        }
+
+        .add-btn:hover{
+            transform:scale(1.05);
+        }
+
+        ul{
+            list-style:none;
+        }
+
+        li{
+            background:#334155;
+            margin-bottom:12px;
+            padding:15px;
+            border-radius:12px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            word-break:break-word;
+        }
+
+        .delete-btn{
+            background:#ef4444;
+            border:none;
+            padding:10px 14px;
+            border-radius:8px;
+            color:white;
+            cursor:pointer;
+            font-weight:bold;
+            transition:0.2s;
+        }
+
+        .delete-btn:hover{
+            transform:scale(1.05);
+        }
+
+    </style>
 </head>
+
 <body>
 
-<h1>Notes App</h1>
+    <div class="container">
 
-<input id="noteInput" placeholder="Write note">
-<button onclick="addNote()">Add</button>
+        <h1>📝 Notes App</h1>
 
-<ul id="notesList"></ul>
+        <div class="input-section">
+            <input id="noteInput" placeholder="Write your note...">
+            <button class="add-btn" onclick="addNote()">
+                Add
+            </button>
+        </div>
 
-<script>
-async function loadNotes() {
-    const response = await fetch('/api/notes');
-    const notes = await response.json();
+        <ul id="notesList"></ul>
 
-    const list = document.getElementById('notesList');
-    list.innerHTML = '';
+    </div>
 
-    notes.forEach(note => {
-        const li = document.createElement('li');
-        li.innerText = note[1];
-        list.appendChild(li);
-    });
-}
+    <script>
 
-async function addNote() {
-    const input = document.getElementById('noteInput');
+        async function loadNotes() {
 
-    await fetch('/api/notes', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            content: input.value
-        })
-    });
+            const response = await fetch('/api/notes');
+            const notes = await response.json();
 
-    input.value = '';
-    loadNotes();
-}
+            const list = document.getElementById('notesList');
 
-loadNotes();
-</script>
+            list.innerHTML = '';
+
+            notes.forEach(note => {
+
+                const li = document.createElement('li');
+
+                li.innerHTML = `
+                    <span>${note[1]}</span>
+
+                    <button 
+                        class="delete-btn"
+                        onclick="deleteNote(${note[0]})">
+                        Delete
+                    </button>
+                `;
+
+                list.appendChild(li);
+            });
+        }
+
+        async function addNote() {
+
+            const input = document.getElementById('noteInput');
+
+            if(input.value.trim() === ''){
+                return;
+            }
+
+            await fetch('/api/notes', {
+
+                method:'POST',
+
+                headers:{
+                    'Content-Type':'application/json'
+                },
+
+                body:JSON.stringify({
+                    content:input.value
+                })
+            });
+
+            input.value='';
+
+            loadNotes();
+        }
+
+        async function deleteNote(id) {
+
+            await fetch(`/api/notes/${id}`, {
+                method:'DELETE'
+            });
+
+            loadNotes();
+        }
+
+        loadNotes();
+
+    </script>
 
 </body>
 </html>

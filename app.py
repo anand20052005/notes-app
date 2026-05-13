@@ -49,10 +49,26 @@ def add_note():
     conn.close()
 
     return jsonify({"message": "Note added"})
+# Delete note
+@app.route("/api/notes/<int:note_id>", methods=["DELETE"])
+def delete_note(note_id):
+
+    conn = sqlite3.connect("notes.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM notes WHERE id = ?",
+        (note_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Note deleted"})
 
 @app.route("/")
 def home():
-    return open("index.html").read()
+    return open("index.html", encoding="utf-8").read()
 
 if __name__ == "__main__":
     app.run(debug=True)
